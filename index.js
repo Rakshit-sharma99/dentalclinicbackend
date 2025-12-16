@@ -5,19 +5,22 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 // ⭐ Correct User Model path AND bcrypt version
-const User = require("./Model/User.js"); 
+const User = require("./Model/User.js");
 const bcrypt = require("bcrypt");
 
 connectMongoose();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
+
 
 // ⭐ MUST for cookie-based auth
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: true,
   credentials: true
 }));
+
+
 
 // ⭐ Parse JSON
 app.use(express.json());
@@ -69,5 +72,5 @@ app.use("/appointment", appointmentRoutes);   // booking
 app.use("/admin", adminRoute);                // admin-only routes
 
 app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+  console.log(`Server running on http://localhost:${port}`);
 });
