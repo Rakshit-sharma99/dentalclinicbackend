@@ -18,6 +18,15 @@ router.get("/check", (req, res) => {
 });
 
 
+// Helper for cookie options
+const isProduction = process.env.NODE_ENV === "production";
+const cookieOptions = {
+  httpOnly: true,
+  secure: isProduction, // true in production (HTTPS)
+  sameSite: isProduction ? "None" : "Lax", // None for cross-site (Vercel->Render), Lax for local
+  maxAge: 24 * 60 * 60 * 1000 // 1 day
+};
+
 // ---------------- SIGNUP ----------------
 router.post("/signup", async (req, res) => {
   try {
@@ -43,12 +52,7 @@ router.post("/signup", async (req, res) => {
     );
 
     // Set cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false, 
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000
-    });
+    res.cookie("token", token, cookieOptions);
 
     // Safe user object (NO PASSWORD)
     res.json({
@@ -87,12 +91,7 @@ router.post("/login", async (req, res) => {
     );
 
     // Set cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000
-    });
+    res.cookie("token", token, cookieOptions);
 
     // Return safe user object
     res.json({
@@ -116,9 +115,8 @@ router.post("/login", async (req, res) => {
 // ---------------- LOGOUT ----------------
 router.post("/logout", (req, res) => {
   res.clearCookie("token", {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax"
+    ...cookieOptions,
+    maxAge: 0
   });
 
   res.json({ msg: "Logged out successfully" });
