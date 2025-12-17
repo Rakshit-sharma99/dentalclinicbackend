@@ -15,7 +15,7 @@ const admin = (req, res, next) => {
 
 // ⭐ BOOK APPOINTMENT (User must be logged in)
 router.post(
-  '/appointment',
+  '/',
   [auth],
   [
     body("name").notEmpty().withMessage("Name is required"),
@@ -32,7 +32,7 @@ router.post(
 
     try {
       const appointment = new Appointment({
-        userId: req.user.id, 
+        userId: req.user.id,
         name: req.body.name,
         phone: req.body.phone,
         email: req.body.email,
