@@ -1,24 +1,26 @@
 const nodemailer = require("nodemailer");
 
 const sendMail = async (to, subject, text) => {
+  console.log(`✉️ Preparing to send email to: ${to}`);
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: "mansimran1414@gmail.com",
-        pass: "rewn vxrf qbsn rvpa",  // use App Password (not normal Gmail password)
+        user: process.env.EMAIL_USER, // Set this in Vercel/Render env vars
+        pass: process.env.EMAIL_PASS,
       },
     });
 
     const mailOptions = {
-      from: "mansimran1414@gmail.com",
+      from: process.env.EMAIL_USER,
       to,
       subject,
       text,
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log("✅ Mail sent successfully");
+    console.log("📤 Sending now...");
+    const info = await transporter.sendMail(mailOptions);
+    console.log("✅ Mail sent successfully:", info.response);
   } catch (error) {
     console.error("❌ Error sending mail:", error);
   }

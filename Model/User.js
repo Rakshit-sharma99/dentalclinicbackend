@@ -4,7 +4,9 @@ const userSchema = new mongoose.Schema({
   name: String,
   email: { type: String, unique: true },
   password: String,
-  role: { type: String, default: "user" }   // admin, user
+  role: { type: String, default: "user" },   // admin, user
+  resetPasswordToken: String,
+  resetPasswordExpires: Date
 });
 
 module.exports = mongoose.model("User", userSchema);

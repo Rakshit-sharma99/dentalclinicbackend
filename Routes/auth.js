@@ -74,14 +74,25 @@ router.post("/signup", async (req, res) => {
 
 // ---------------- LOGIN ----------------
 router.post("/login", async (req, res) => {
+  console.log("👉 Login Request Received:", req.body);
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ msg: "User not found" });
+    console.log("👤 User Found:", user ? "Yes" : "No");
+
+    if (!user) {
+      console.log("❌ User not found");
+      return res.status(400).json({ msg: "User not found" });
+    }
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ msg: "Wrong password" });
+    console.log("🔐 Password Match:", match);
+
+    if (!match) {
+      console.log("❌ Password mismatch");
+      return res.status(400).json({ msg: "Wrong password" });
+    }
 
     // Create JWT
     const token = jwt.sign(
@@ -89,6 +100,7 @@ router.post("/login", async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
+    console.log("✅ Token generated, sending cookie");
 
     // Set cookie
     res.cookie("token", token, cookieOptions);
@@ -105,6 +117,7 @@ router.post("/login", async (req, res) => {
     });
 
   } catch (err) {
+    console.error("🔥 Login Error:", err);
     console.log(err);
     res.status(500).json({ msg: "Server error" });
   }
@@ -122,6 +135,138 @@ router.post("/logout", (req, res) => {
   res.json({ msg: "Logged out successfully" });
 });
 
+// ---------------- FORGOT PASSWORD ----------------
+const crypto = require("crypto");
+const sendMail = require("../utils/sendMail");
+
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      // Security: Always return success to prevent email enumeration
+      return res.json({ msg: "If an account exists, a reset link has been sent to your email." });
+    }
+
+    // Generate token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    // Hash token for storage
+    user.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+
+    await user.save();
+
+    // Create Link (Frontend URL)
+    // NOTE: In production, use process.env.FRONTEND_URL. For now, hardcoding as per plan or assuming local/vercel.
+    // User asked for: https://your-frontend-domain.com/reset-password/{RAW_TOKEN}
+    // I will use a placeholder that the user can likely configure or I'll detect. 
+    // Given previous context, it's localhost or vercel. Let's use a dynamic approach or hardcode for now based on what User asked in plan?
+    // Plan said: `https://dentalfrontend.vercel.app/reset-password/{RAW_TOKEN}` (localized for dev).
+    // I'll stick to a safe default or checking origin, but let's use the Vercel one as primary if production, else localhost.
+
+    // Generate Reset Link
+    // Use FRONTEND_URL from env, or default to Vercel/Localhost if not set
+    const frontendUrl = process.env.FRONTEND_URL || "https://dentalfrontend.vercel.app";
+    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+
+    const message = `
+Hello,
+
+We received a request to reset the password for your Dental Clinic account.
+
+Click the link below to set a new password:
+${resetUrl}
+
+This link will expire in 1 hour for security reasons.
+
+⚠️ Do not share this link with anyone. Our team will never ask for your password.
+
+If you did not request this password reset, please ignore this email.
+Your account will remain secure.
+
+Regards,
+Dental Clinic Support Team
+    `;
+
+    try {
+      await sendMail(user.email, "🔐 Reset Your Password – Dental Clinic Account", message);
+      res.json({ msg: "If an account exists, a reset link has been sent to your email." });
+    } catch (err) {
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save();
+      return res.status(500).json({ msg: "Email could not be sent" });
+    }
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
+// ---------------- RESET PASSWORD ----------------
+router.post("/reset-password/:token", async (req, res) => {
+  try {
+    // Hash incoming token to compare with DB
+    const hashedToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ msg: "Invalid or expired token" });
+    }
+
+    // Hash new password
+    const hashedPass = await bcrypt.hash(req.body.password, 10);
+
+    user.password = hashedPass;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    res.json({ msg: "Password updated successfully" });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
+// ---------------- UPDATE PROFILE ----------------
+const auth = require("../middleware/auth");
+
+router.put("/update-profile", auth, async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ msg: "Name is required" });
+    }
+
+    // Find and update
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { name },
+      { new: true } // Return updated doc
+    ).select("-password -resetPasswordToken -resetPasswordExpires");
+
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    res.json({ msg: "Profile updated successfully", user });
+
+  } catch (err) {
+    console.error("Profile Update Error:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
 
 // ---------------- CREATE DEFAULT ADMIN ----------------
 
