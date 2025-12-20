@@ -13,10 +13,13 @@ connectMongoose();
 const app = express();
 const port = process.env.PORT || 3000;
 
+// ⭐ Trust proxy is required for cookies (secure: true) to work on Render/Vercel
+app.set("trust proxy", 1);
+
 
 // ⭐ MUST for cookie-based auth
 app.use(cors({
-  origin: true,
+  origin: process.env.FRONTEND_URL || true, // Trust the specific origin if set, else reflect request origin
   credentials: true
 }));
 

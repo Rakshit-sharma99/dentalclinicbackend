@@ -28,8 +28,8 @@ router.get("/check", (req, res) => {
 const isProduction = process.env.NODE_ENV === "production";
 const cookieOptions = {
   httpOnly: true,
-  secure: isProduction, // true in production (HTTPS)
-  sameSite: isProduction ? "None" : "Lax", // None for cross-site (Vercel->Render), Lax for local
+  secure: true, // Always secure for cross-site (Render forces HTTPS anyway)
+  sameSite: "None", // Required for cross-site cookies
   maxAge: 24 * 60 * 60 * 1000 // 1 day
 };
 
