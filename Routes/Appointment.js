@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Appointment = require('../Model/AppointmentModel');
-const { sendEmail } = require('../services/emailService');
+// Email service removed as per user request
 const auth = require("../middleware/auth");
 const { body, validationResult } = require('express-validator');
 
@@ -44,11 +44,8 @@ router.post(
       await appointment.save();
 
       // Send confirmation email to user
-      await sendEmail({
-        to: appointment.email,
-        subject: "Appointment Request Received",
-        text: `Hello ${appointment.name},\n\nYour appointment request for ${appointment.date} at ${appointment.time} has been received.\n\nWe will review your request and get back to you shortly.\n\nBest Regards,\nDental Clinic Team`
-      });
+      // Email removed
+      console.log("🚫 Email sending removed for: Appointment Booked");
 
       res.status(201).json({ message: "Appointment Booked Successfully!" });
 
@@ -85,11 +82,8 @@ router.put("/accept/:id", auth, admin, async (req, res) => {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
-    await sendEmail({
-      to: appointment.email,
-      subject: "Appointment Accepted",
-      text: `Hello ${appointment.name}, your appointment on ${appointment.date} at ${appointment.time} has been accepted!`
-    });
+    // Email removed
+    console.log("🚫 Email sending removed for: Appointment Accepted");
 
     res.json({ message: "Appointment Accepted!", appointment });
 
@@ -114,11 +108,8 @@ router.put("/decline/:id", auth, admin, async (req, res) => {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
-    await sendEmail({
-      to: appointment.email,
-      subject: "Appointment Declined",
-      text: `Hello ${appointment.name}, your appointment on ${appointment.date} at ${appointment.time} was declined.`
-    });
+    // Email removed
+    console.log("🚫 Email sending removed for: Appointment Declined");
 
     res.json({ message: "Appointment Declined!", appointment });
 

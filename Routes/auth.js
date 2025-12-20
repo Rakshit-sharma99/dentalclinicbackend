@@ -144,7 +144,7 @@ router.post("/logout", (req, res) => {
 
 // ---------------- FORGOT PASSWORD ----------------
 const crypto = require("crypto");
-const { sendEmail } = require("../services/emailService");
+// Email service removed as per user request
 
 router.post("/forgot-password", async (req, res) => {
   try {
@@ -198,20 +198,18 @@ Dental Clinic Support Team
     `;
 
     try {
-      console.log(`🚀 [DEBUG] Attempting to send reset email to: ${user.email}`);
-      await sendEmail({
-        to: user.email,
-        subject: "🔐 Reset Your Password – Dental Clinic Account",
-        text: message
-      });
-      console.log("✅ [DEBUG] Email send function completed successfully");
-      res.json({ msg: "DEPLOYMENT VERIFIED: Reset link sent (Check Spam folder!)" });
+      console.log(`🚀 [DEBUG] Password reset requested for: ${user.email}`);
+      // Email removed
+      console.log("🚫 Email sending removed. Reset link would be:", message);
+
+      res.json({ msg: "Email system disabled. Contact support for reset." });
     } catch (err) {
-      console.error("❌ [DEBUG] Email failed in route:", err);
+      console.error("❌ [DEBUG] Error in forgot password route:", err);
+      // Clean up token if something fails
       user.resetPasswordToken = undefined;
       user.resetPasswordExpires = undefined;
       await user.save();
-      return res.status(500).json({ msg: "Email could not be sent. Check server logs." });
+      return res.status(500).json({ msg: "Internal Error" });
     }
 
   } catch (err) {
