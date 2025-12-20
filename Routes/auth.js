@@ -6,13 +6,19 @@ const router = express.Router();
 
 // ---------------- CHECK LOGIN STATUS ----------------
 router.get("/check", (req, res) => {
+  console.log("🔍 Check Auth Request - Cookies:", req.cookies); // DEBUG LOG
   const token = req.cookies.token;
-  if (!token) return res.json({ loggedIn: false });
+  if (!token) {
+    console.log("❌ No token found in cookies");
+    return res.json({ loggedIn: false });
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("✅ Token verified for user:", decoded.email);
     res.json({ loggedIn: true, user: decoded });
   } catch (err) {
+    console.log("❌ Token verification failed:", err.message);
     return res.json({ loggedIn: false });
   }
 });
@@ -104,6 +110,7 @@ router.post("/login", async (req, res) => {
 
     // Set cookie
     res.cookie("token", token, cookieOptions);
+    console.log("🍪 Cookie set with options:", cookieOptions); // DEBUG LOG
 
     // Return safe user object
     res.json({
@@ -137,7 +144,7 @@ router.post("/logout", (req, res) => {
 
 // ---------------- FORGOT PASSWORD ----------------
 const crypto = require("crypto");
-const sendMail = require("../utils/sendMail");
+const { sendEmail } = require("../services/emailService");
 
 router.post("/forgot-password", async (req, res) => {
   try {
@@ -191,7 +198,11 @@ Dental Clinic Support Team
     `;
 
     try {
-      await sendMail(user.email, "🔐 Reset Your Password – Dental Clinic Account", message);
+      await sendEmail({
+        to: user.email,
+        subject: "🔐 Reset Your Password – Dental Clinic Account",
+        text: message
+      });
       res.json({ msg: "If an account exists, a reset link has been sent to your email." });
     } catch (err) {
       user.resetPasswordToken = undefined;

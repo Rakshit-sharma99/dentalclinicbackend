@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Appointment = require('../Model/AppointmentModel');
-const sendMail = require('../utils/sendMail');
+const { sendEmail } = require('../services/emailService');
 const auth = require("../middleware/auth");
 const { body, validationResult } = require('express-validator');
 
@@ -42,6 +42,14 @@ router.post(
       });
 
       await appointment.save();
+
+      // Send confirmation email to user
+      await sendEmail({
+        to: appointment.email,
+        subject: "Appointment Request Received",
+        text: `Hello ${appointment.name},\n\nYour appointment request for ${appointment.date} at ${appointment.time} has been received.\n\nWe will review your request and get back to you shortly.\n\nBest Regards,\nDental Clinic Team`
+      });
+
       res.status(201).json({ message: "Appointment Booked Successfully!" });
 
     } catch (err) {
@@ -77,11 +85,11 @@ router.put("/accept/:id", auth, admin, async (req, res) => {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
-    await sendMail(
-      appointment.email,
-      "Appointment Accepted",
-      `Hello ${appointment.name}, your appointment on ${appointment.date} at ${appointment.time} has been accepted!`
-    );
+    await sendEmail({
+      to: appointment.email,
+      subject: "Appointment Accepted",
+      text: `Hello ${appointment.name}, your appointment on ${appointment.date} at ${appointment.time} has been accepted!`
+    });
 
     res.json({ message: "Appointment Accepted!", appointment });
 
@@ -106,11 +114,11 @@ router.put("/decline/:id", auth, admin, async (req, res) => {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
-    await sendMail(
-      appointment.email,
-      "Appointment Declined",
-      `Hello ${appointment.name}, your appointment on ${appointment.date} at ${appointment.time} was declined.`
-    );
+    await sendEmail({
+      to: appointment.email,
+      subject: "Appointment Declined",
+      text: `Hello ${appointment.name}, your appointment on ${appointment.date} at ${appointment.time} was declined.`
+    });
 
     res.json({ message: "Appointment Declined!", appointment });
 
