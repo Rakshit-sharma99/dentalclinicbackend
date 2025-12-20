@@ -1,34 +1,31 @@
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
+    host: "smtp-relay.brevo.com",
     port: 587,
     secure: false,
     auth: {
-        user: "mdclinicjalandhar@gmail.com",
-        pass: "paks zizd avgo xxfe",
+        user: "apikey",
+        pass: process.env.BREVO_API_KEY,
     },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
 });
 
 const sendEmail = async ({ to, subject, text, html }) => {
     try {
         const info = await transporter.sendMail({
-            from: `"Dental Clinic" <mdclinicjalandhar@gmail.com>`,
+            from: `Dental Clinic <${process.env.EMAIL_FROM}>`,
             to,
             subject,
             text,
             html,
         });
 
-        console.log("📩 Message sent:", info.messageId);
+        console.log("📩 Email sent:", info.messageId);
         return { success: true };
 
-    } catch (err) {
-        console.error("❌ Mail error:", err);
-        return { success: false, error: err.message };
+    } catch (error) {
+        console.error("❌ Email error:", error);
+        return { success: false, error: error.message };
     }
 };
 
