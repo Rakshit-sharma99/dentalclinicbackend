@@ -7,12 +7,17 @@ const createTransporter = () => {
         port: 587,
         secure: false, // true for 465, false for other ports
         auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
+            user: "mdclinicjalandhar@gmail.com", // Hardcoded as requested for debugging
+            pass: "paks zizd avgo xxfe",        // Hardcoded as requested for debugging
         },
         tls: {
             rejectUnauthorized: false
-        }
+        },
+        logger: true, // Log to console
+        debug: true,  // Include debug info
+        connectionTimeout: 10000,
+        greetingTimeout: 5000,
+        socketTimeout: 10000
     });
 };
 
