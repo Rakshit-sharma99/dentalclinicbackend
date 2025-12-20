@@ -198,17 +198,20 @@ Dental Clinic Support Team
     `;
 
     try {
+      console.log(`🚀 [DEBUG] Attempting to send reset email to: ${user.email}`);
       await sendEmail({
         to: user.email,
         subject: "🔐 Reset Your Password – Dental Clinic Account",
         text: message
       });
-      res.json({ msg: "If an account exists, a reset link has been sent to your email." });
+      console.log("✅ [DEBUG] Email send function completed successfully");
+      res.json({ msg: "DEPLOYMENT VERIFIED: Reset link sent (Check Spam folder!)" });
     } catch (err) {
+      console.error("❌ [DEBUG] Email failed in route:", err);
       user.resetPasswordToken = undefined;
       user.resetPasswordExpires = undefined;
       await user.save();
-      return res.status(500).json({ msg: "Email could not be sent" });
+      return res.status(500).json({ msg: "Email could not be sent. Check server logs." });
     }
 
   } catch (err) {
