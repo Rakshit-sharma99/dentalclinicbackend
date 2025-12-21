@@ -73,6 +73,8 @@ createDefaultAdmin();
 app.use("/user", authRoutes);                 // signup/login/logout
 app.use("/appointment", appointmentRoutes);   // booking
 app.use("/admin", adminRoute);                // admin-only routes
+const reviewsRoute = require('./Routes/Reviews');
+app.use("/api/reviews", reviewsRoute);        // public reviews
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);

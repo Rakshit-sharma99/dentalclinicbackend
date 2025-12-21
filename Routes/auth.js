@@ -141,7 +141,7 @@ router.post("/forgot-password", async (req, res) => {
     await user.save();
 
     const frontendUrl =
-      process.env.FRONTEND_URL || "https://dentalfrontend.vercel.app";
+      process.env.FRONTEND_URL || "http://localhost:5173";
 
     const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
@@ -167,7 +167,7 @@ router.post("/forgot-password", async (req, res) => {
           }
           .content {
             padding: 30px;
-            color: #333333;
+            color: #000000ff;
             line-height: 1.6;
           }
           .button {
@@ -211,7 +211,7 @@ router.post("/forgot-password", async (req, res) => {
             <p style="font-size: 13px; color: #666;">If you did not request this password reset, please ignore this email. Your account remains secure.</p>
           </div>
           <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} Modern Dental Clinic. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} Devloped By Webaura. All rights reserved.</p>
             <p>Phagwara, Punjab</p>
           </div>
         </div>
