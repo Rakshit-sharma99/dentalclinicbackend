@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Appointment = require('../Model/AppointmentModel');
-// Email service removed as per user request
+const { sendEmail } = require('../services/emailService');
+const { getAppointmentEmail } = require('../utils/emailTemplates');
 const auth = require("../middleware/auth");
 const { body, validationResult } = require('express-validator');
 
@@ -44,8 +45,17 @@ router.post(
       await appointment.save();
 
       // Send confirmation email to user
-      // Email removed
-      console.log("🚫 Email sending removed for: Appointment Booked");
+      try {
+        const html = getAppointmentEmail(appointment.name, "Pending", appointment.date, appointment.time);
+        await sendEmail({
+          to: appointment.email,
+          subject: "Appointment Request Received - Modern Dental",
+          html
+        });
+        console.log("📩 Appointment Pending Email sent");
+      } catch (emailErr) {
+        console.error("❌ Email failed:", emailErr);
+      }
 
       res.status(201).json({ message: "Appointment Booked Successfully!" });
 
@@ -82,8 +92,17 @@ router.put("/accept/:id", auth, admin, async (req, res) => {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
-    // Email removed
-    console.log("🚫 Email sending removed for: Appointment Accepted");
+    try {
+      const html = getAppointmentEmail(appointment.name, "Accepted", appointment.date, appointment.time);
+      await sendEmail({
+        to: appointment.email,
+        subject: "Appointment Confirmed - Modern Dental",
+        html
+      });
+      console.log("📩 Appointment Accepted Email sent");
+    } catch (emailErr) {
+      console.error("❌ Email failed:", emailErr);
+    }
 
     res.json({ message: "Appointment Accepted!", appointment });
 
@@ -108,8 +127,17 @@ router.put("/decline/:id", auth, admin, async (req, res) => {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
-    // Email removed
-    console.log("🚫 Email sending removed for: Appointment Declined");
+    try {
+      const html = getAppointmentEmail(appointment.name, "Declined", appointment.date, appointment.time);
+      await sendEmail({
+        to: appointment.email,
+        subject: "Appointment Declined - Modern Dental",
+        html
+      });
+      console.log("📩 Appointment Declined Email sent");
+    } catch (emailErr) {
+      console.error("❌ Email failed:", emailErr);
+    }
 
     res.json({ message: "Appointment Declined!", appointment });
 
