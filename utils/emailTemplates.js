@@ -1,19 +1,28 @@
 const getAppointmentEmail = (name, status, date, time) => {
-    let statusColor = "#007bff"; // Blue for Pending
-    let statusMessage = "We have received your appointment request.";
-    let title = "Appointment Request Received";
+  let statusColor = "#007bff"; // Blue for Pending
+  let statusMessage = "We have received your appointment request.";
+  let title = "Appointment Request Received";
 
-    if (status === "Accepted") {
-        statusColor = "#28a745"; // Green
-        statusMessage = "Your appointment has been <b>ACCEPTED</b>.";
-        title = "Appointment Confirmed";
-    } else if (status === "Declined") {
-        statusColor = "#dc3545"; // Red
-        statusMessage = "Your appointment request has been <b>DECLINED</b>.";
-        title = "Appointment Update";
-    }
+  if (status === "Accepted") {
+    statusColor = "#28a745"; // Green
+    statusMessage = `
+            Your appointment has been <b>ACCEPTED</b>.<br/><br/>
+            <b>Please visit the clinic 5 minutes prior to your booking.</b><br/>
+            📍 <a href="https://maps.app.goo.gl/LyYPptC8QEPoEngr7" style="color: #007bff; text-decoration: none;">Click here for Clinic Location</a>
+        `;
+    title = "Appointment Confirmed";
+  } else if (status === "Declined") {
+    statusColor = "#dc3545"; // Red
+    statusMessage = `
+            Your appointment request has been <b>DECLINED</b>.<br/><br/>
+            If you have questions, please contact us directly:<br/>
+            📧 <a href="mailto:mdclinicjalandhar@gmail.com" style="color:#007bff;">mdclinicjalandhar@gmail.com</a><br/>
+            📞 <a href="tel:9877214745" style="color:#007bff;">9877214745</a>
+        `;
+    title = "Appointment Update";
+  }
 
-    return `
+  return `
     <!DOCTYPE html>
     <html>
     <head>
