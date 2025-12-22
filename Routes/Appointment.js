@@ -20,7 +20,7 @@ router.post(
   [auth],
   [
     body("name").notEmpty().withMessage("Name is required"),
-    body("phone").isLength({ min: 10, max: 10 }).withMessage("Enter valid phone number"),
+    body("phone").isLength({ min: 10, max: 15 }).withMessage("Enter valid phone number"),
     body("email").isEmail().withMessage("Enter a valid email"),
     body("date").notEmpty().withMessage("Date is required"),
     body("time").notEmpty().withMessage("Time is required"),
@@ -28,6 +28,8 @@ router.post(
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log("❌ Validation Errors:", errors.array());
+      console.log("📦 Request Body:", req.body); // Check what is actually received
       return res.status(400).json({ errors: errors.array() });
     }
 

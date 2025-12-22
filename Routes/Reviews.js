@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
 
 // Mock data as fallback
 const MOCK_REVIEWS = [
@@ -42,35 +41,10 @@ const MOCK_REVIEWS = [
     }
 ];
 
-router.get('/', async (req, res) => {
-    const apiKey = process.env.GOOGLE_PLACES_API_KEY;
-    const placeId = process.env.GOOGLE_PLACE_ID;
-
-    if (!apiKey || !placeId) {
-        console.warn("Missing Google API Key or Place ID. Returning mock reviews.");
-        return res.json(MOCK_REVIEWS);
-    }
-
-    try {
-        const response = await axios.get(
-            `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews&key=${apiKey}`
-        );
-
-        if (response.data.status === 'OK' && response.data.result.reviews) {
-            // Transform Google data to match our component expectation if needed
-            // Or just return the raw reviews array. Component expects: name, text, rating, image (profile_photo_url)
-            // Google gives: author_name, text, rating, profile_photo_url
-            // Matches fairly well.
-            console.log("Fetched reviews from Google API.");
-            return res.json(response.data.result.reviews);
-        } else {
-            console.error("Google API Error or No Reviews:", response.data);
-            return res.json(MOCK_REVIEWS); // Fallback
-        }
-    } catch (error) {
-        console.error("Failed to fetch Google Reviews:", error.message);
-        return res.json(MOCK_REVIEWS); // Fallback to mock data on network error
-    }
+router.get('/', (req, res) => {
+    // Directly return mock reviews as per user request
+    console.log("Serving Mock Reviews (Google API disabled).");
+    return res.json(MOCK_REVIEWS);
 });
 
 module.exports = router;
