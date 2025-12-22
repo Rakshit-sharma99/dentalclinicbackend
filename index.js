@@ -16,10 +16,19 @@ const port = process.env.PORT || 3000;
 // ⭐ Trust proxy is required for cookies (secure: true) to work on Render/Vercel
 app.set("trust proxy", 1);
 
+const allowedOrigins = [
+  "https://moderndentalclinicphagwara.com",
+  "http://localhost:5173"
+];
 
-// ⭐ MUST for cookie-based auth
 app.use(cors({
-  origin: process.env.FRONTEND_URL || true, // Trust the specific origin if set, else reflect request origin
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
 
@@ -34,7 +43,6 @@ app.use(cookieParser());
 // Routes
 const appointmentRoutes = require('./Routes/Appointment');
 const authRoutes = require('./Routes/auth');
-const adminRoute = require("./Routes/admin");
 
 // ⭐ AUTO CREATE DEFAULT ADMIN IF NOT EXISTS
 async function createDefaultAdmin() {
@@ -72,8 +80,9 @@ createDefaultAdmin();
 // Route middlewares
 app.use("/user", authRoutes);                 // signup/login/logout
 app.use("/appointment", appointmentRoutes);   // booking
-app.use("/admin", adminRoute);                // admin-only routes
+const reviewsRoute = require('./Routes/Reviews');
+app.use("/api/reviews", reviewsRoute);        // public reviews
 
 app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+  console.log(`Server running on port ${port}`);
 });

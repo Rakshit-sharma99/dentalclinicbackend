@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Appointment = require('../Model/AppointmentModel');
-// Email service removed as per user request
+const { sendEmail } = require('../services/emailService');
+const { getAppointmentEmail } = require('../utils/emailTemplates');
 const auth = require("../middleware/auth");
 const { body, validationResult } = require('express-validator');
 
@@ -19,7 +20,7 @@ router.post(
   [auth],
   [
     body("name").notEmpty().withMessage("Name is required"),
-    body("phone").isLength({ min: 10, max: 10 }).withMessage("Enter valid phone number"),
+    body("phone").isLength({ min: 10, max: 15 }).withMessage("Enter valid phone number"),
     body("email").isEmail().withMessage("Enter a valid email"),
     body("date").notEmpty().withMessage("Date is required"),
     body("time").notEmpty().withMessage("Time is required"),
@@ -27,6 +28,8 @@ router.post(
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log("❌ Validation Errors:", errors.array());
+      console.log("📦 Request Body:", req.body); // Check what is actually received
       return res.status(400).json({ errors: errors.array() });
     }
 
@@ -44,8 +47,17 @@ router.post(
       await appointment.save();
 
       // Send confirmation email to user
-      // Email removed
-      console.log("🚫 Email sending removed for: Appointment Booked");
+      try {
+        const html = getAppointmentEmail(appointment.name, "Pending", appointment.date, appointment.time);
+        await sendEmail({
+          to: appointment.email,
+          subject: "Appointment Request Received - Modern Dental",
+          html
+        });
+        console.log("📩 Appointment Pending Email sent");
+      } catch (emailErr) {
+        console.error("❌ Email failed:", emailErr);
+      }
 
       res.status(201).json({ message: "Appointment Booked Successfully!" });
 
@@ -82,8 +94,17 @@ router.put("/accept/:id", auth, admin, async (req, res) => {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
-    // Email removed
-    console.log("🚫 Email sending removed for: Appointment Accepted");
+    try {
+      const html = getAppointmentEmail(appointment.name, "Accepted", appointment.date, appointment.time);
+      await sendEmail({
+        to: appointment.email,
+        subject: "Appointment Confirmed - Modern Dental",
+        html
+      });
+      console.log("📩 Appointment Accepted Email sent");
+    } catch (emailErr) {
+      console.error("❌ Email failed:", emailErr);
+    }
 
     res.json({ message: "Appointment Accepted!", appointment });
 
@@ -108,8 +129,17 @@ router.put("/decline/:id", auth, admin, async (req, res) => {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
-    // Email removed
-    console.log("🚫 Email sending removed for: Appointment Declined");
+    try {
+      const html = getAppointmentEmail(appointment.name, "Declined", appointment.date, appointment.time);
+      await sendEmail({
+        to: appointment.email,
+        subject: "Appointment Declined - Modern Dental",
+        html
+      });
+      console.log("📩 Appointment Declined Email sent");
+    } catch (emailErr) {
+      console.error("❌ Email failed:", emailErr);
+    }
 
     res.json({ message: "Appointment Declined!", appointment });
 

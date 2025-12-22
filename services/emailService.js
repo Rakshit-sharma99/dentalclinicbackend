@@ -5,15 +5,15 @@ const transporter = nodemailer.createTransport({
     port: 587,
     secure: false,
     auth: {
-        user: "apikey",
-        pass: process.env.BREVO_API_KEY,
+        user: process.env.BREVO_USER,
+        pass: process.env.BREVO_SMTP_KEY,
     },
 });
 
 const sendEmail = async ({ to, subject, text, html }) => {
     try {
         const info = await transporter.sendMail({
-            from: `Dental Clinic <${process.env.EMAIL_FROM}>`,
+            from: `Modern Dental <${process.env.EMAIL_FROM}>`,
             to,
             subject,
             text,
