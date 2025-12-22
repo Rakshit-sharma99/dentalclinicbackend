@@ -140,10 +140,13 @@ router.post("/forgot-password", async (req, res) => {
     user.resetPasswordExpires = Date.now() + 60 * 60 * 1000; // 1 hour
     await user.save();
 
-    const frontendUrl =
-      process.env.FRONTEND_URL || "http://localhost:5173";
+    // Trim trailing slash if present
+    const rawUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const frontendUrl = rawUrl.replace(/\/$/, "");
 
     const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+
+    console.log("🔗 Generated Reset Link:", resetUrl);
 
     const html = `
       <!DOCTYPE html>
