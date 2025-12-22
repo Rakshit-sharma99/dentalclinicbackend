@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 
-const USER = "9e7ddb001@smtp-brevo.com";
-const PASS = "xsmtpsib-a13b42f890505de43ad80ef6e4bd03cf63fd28b2bd5993300642610c9b1f879f-SOEzSeTUM8J9Pw3D";
+const USER = process.env.BREVO_USER;
+const PASS = process.env.BREVO_SMTP_KEY;
 
 async function verify() {
     console.log(`🚀 Testing Final Config...`);
