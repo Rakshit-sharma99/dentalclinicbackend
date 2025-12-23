@@ -9,9 +9,10 @@ const transporter = nodemailer.createTransport({
     secure: false,
     auth: {
         user: process.env.BREVO_USER,
-        pass: process.env.BREVO_SMTP_KEY,
-    },
+        pass: process.env.BREVO_SMTP_KEY
+    }
 });
+
 
 async function verify() {
     try {
@@ -27,5 +28,6 @@ async function verify() {
         process.exit(1);
     }
 }
+console.log("🔑 SMTP KEY PREFIX:", process.env.BREVO_SMTP_KEY?.slice(0, 10));
 
 verify();
