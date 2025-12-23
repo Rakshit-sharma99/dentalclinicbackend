@@ -13,6 +13,20 @@ connectMongoose();
 const app = express();
 const port = process.env.PORT || 3000;
 
+// ⭐ Support for Render "Secret Files" (uploaded .env)
+require("dotenv").config({ path: "/etc/secrets/.env" });
+
+// ⭐ Debug Route (Check if variables are loaded)
+app.get("/debug-config", (req, res) => {
+  res.json({
+    BREVO_USER: process.env.BREVO_USER ? "✅ Defined" : "❌ Missing",
+    BREVO_SMTP_KEY: process.env.BREVO_SMTP_KEY ? "✅ Defined" : "❌ Missing",
+    EMAIL_FROM: process.env.EMAIL_FROM ? "✅ Defined" : "❌ Missing",
+    MONGO_URI: process.env.MONGO_URI ? "✅ Defined" : "❌ Missing",
+    CORS_ORIGIN: req.headers.origin
+  });
+});
+
 // ⭐ Trust proxy is required for cookies (secure: true) to work on Render/Vercel
 app.set("trust proxy", 1);
 
