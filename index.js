@@ -18,16 +18,27 @@ app.set("trust proxy", 1);
 
 const allowedOrigins = [
   "https://moderndentalclinicphagwara.com",
+  "https://www.moderndentalclinicphagwara.com",
   "http://localhost:5173"
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+
+    // Check exact match
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
     }
+
+    // Check Vercel preview deployments
+    if (origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+
+    console.log("❌ CORS blocked origin:", origin);
+    callback(new Error("Not allowed by CORS"));
   },
   credentials: true
 }));
