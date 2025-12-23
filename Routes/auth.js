@@ -9,10 +9,12 @@ const auth = require("../middleware/auth");
 const { sendEmail } = require("../services/emailService");
 
 // ---------------- COOKIE OPTIONS ----------------
+// Production-ready cookie settings for cross-site auth (Vercel frontend <-> Render backend)
 const cookieOptions = {
   httpOnly: true,
-  secure: true,        // Render / HTTPS
-  sameSite: "None",    // Cross-site cookies
+  secure: process.env.NODE_ENV === "production" || true,  // Always true for cross-site
+  sameSite: "None",    // Required for cross-site cookies
+  path: "/",           // Explicit path for all routes
   maxAge: 24 * 60 * 60 * 1000 // 1 day
 };
 
